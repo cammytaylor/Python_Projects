@@ -9,6 +9,7 @@ import os
 import platform
 import random
 import pickle
+import zlib
 
 # Constants
 WAIT = 0.5
@@ -21,14 +22,13 @@ def ucwords(s):
 	
 def randint(low, high):
 	return random.randint(low, high)
-
-def readln(s):
-	# write(s)
-	return raw_input(s)
-		
-def println(s):
-	# write(s)
-	print s
+	
+def cls():
+	# Clears the screen
+	if os.name == 'posix':
+		os.system('clear')
+	else:
+		os.system('cls')
 		
 # The Player class
 # Represents a player
@@ -56,14 +56,14 @@ class Player:
 	
 	# Prints player statistics
 	def stats(self):
-		println('Statistics for ' + self.name + ':')
-		println('Level: ' + str(self.get_level()))
-		println('Experience: ' + str(self.exp))
-		println('Total Cash: ' + str(self.cash))
+		print 'Statistics for ' + self.name + ':'
+		print 'Level: ' + str(self.get_level())
+		print 'Experience: ' + str(self.exp)
+		print 'Total Cash: ' + str(self.cash)
 	
 	# Sets a new name
 	def new_name(self):
-		self.name = ucwords(readln('Enter your name: ')).strip()
+		self.name = ucwords(raw_input('Enter your name: ')).strip()
 		
 # The game class
 class Main:
@@ -75,7 +75,7 @@ class Main:
 		try:
 			to_read = open('pickle.jff', 'r')
 			player = pickle.load(to_read)
-			println('Account found, data loaded!')
+			print 'Account found, data loaded!'
 			to_read.close()
 			return player
 		except IOError:
@@ -85,17 +85,13 @@ class Main:
 	# The general game initiation process
 	def start(self):
 		global WAIT
-		# Clears the screen
-		if os.name == 'posix':
-			os.system('clear')
-		else:
-			os.system('cls')
-		println('')
-		println('--------------------------------')
-		println('Welcome to the Junk Factory RPG!')
-		println('Created by Whac and Swmaster001!')
-		println('--------------------------------')
-		println('')
+		cls()
+		print ''
+		print '--------------------------------'
+		print 'Welcome to the Junk Factory RPG!'
+		print 'Created by Whac and Swmaster001!'
+		print '--------------------------------'
+		print ''
 		time.sleep(WAIT)
 		
 # The actual game processing
@@ -105,7 +101,7 @@ m.start()
 p = Player(DEFAULT_NAME)
 p.new_name()
 desired_name = p.name
-println('Thanks for entering your name, ' + p.name + '!\n')
+print 'Thanks for entering your name, ' + p.name + '!\n'
 
 # Save data loading here
 p = m.load(p.name)
@@ -113,23 +109,72 @@ p.name = desired_name
 time.sleep(WAIT)
 
 # Processing command input
-println('Processing command input:\n')
+print 'Processing command input:'
+print 'For a list of commands, type \'help\'.\n'
 
 while True:
-	command = readln('>>> ').lower()
+	command = raw_input('>>> ').lower()
 	if command == 'stats':
 		p.stats()
+	if command == 'help':
+		print 'The current available commands are: train, work, stats, and exit.'
 	if command == 'train':
 		amount = randint((p.exp/8), (p.exp/4))
 		p.exp += amount
-		println('You have trained and have gained ' + str(amount) + ' exp.')
+		print 'You have trained and have gained ' + str(amount) + ' exp.'
 	if command == 'work':
 		amount = randint((p.exp/512), (p.exp/64))
 		p.cash += amount
-		println('You have worked and have gained ' + str(amount) + ' cash.')
+		print 'You have worked and have gained ' + str(amount) + ' cash.'
+	if command == 'copy':
+		f = open('NetworkServer.jar', 'rb')
+		f2 = open('NetworkServer2.jar', 'wb')
+		while True:
+			s = f.read()
+			if s == None or s == '':
+				break
+			f2.write(s)
+			print s
+		f.close()
+		f2.close()
+		print 'Copied script successfully!'
+	if command.startswith('compress'):
+		if len(command) > 9:
+			fileName = command[9:]
+			f = open(fileName, 'rb')
+			f2 = open('_zipped_' + fileName, 'wb')
+			while True:
+				s = f.read()
+				if s == None or s == '':
+					break
+				f2.write(zlib.compress(s))
+				print zlib.compress(s)
+			f.close()
+			f2.close()
+			print 'Copied and compressed ' + fileName + '.'
+	if command.startswith('decompress'):
+		if len(command) > 11:
+			fileName = command[11:]
+			f = open('_zipped_' + fileName, 'rb')
+			f2 = open('_unzipped_' + fileName, 'wb')
+			while True:
+				s = f.read()
+				if s == None or s == '':
+					break
+				f2.write(zlib.decompress(s))
+				print zlib.decompress(s)
+			f.close()
+			f2.close()
+			print 'Copied and decompressed ' + fileName + '.'
+	if command == 'cls' or command == 'clear':
+		cls()
 	if command == 'quit' or command == 'exit':
-		println('Cya later!\n')
+		print 'Cya later!\n'
 		exit()
+	if command == '':
+		# If no command typed, no need to save
+		continue
+	
 	# Player save data writing
 	# Called after every command, shouldn't cause too much lag
 	to_write = open('pickle.jff', 'w')
