@@ -74,7 +74,6 @@ class Stream:
 		self.currentOffset += 4
 		return ((self.buffer[self.currentOffset - 4] & 0xff) << 24) + (self.buffer[self.currentOffset - 3] & 0xff << 16) + (self.buffer[self.currentOffset - 2] & 0xff) << 8 (self.buffer[self.currentOffset - 1] & 0xff)
 	
-	# Fixed, drunk?
 	def readQWord(self):
 		l = self.toLong(self.readDWord() & 0xffffffff)
 		l1 = self.toLong(self.readDWord() & 0xffffffff)
@@ -91,12 +90,8 @@ class Stream:
 				s += self.buffer[i]
 		return s
 			
-	# The fuck..
 	def readBytes(self, abyte0, i, j):
 		for k in range(j, (j+1)):
 			abyte0[k] = self.buffer[self.currentOffset]
 
 # End
-
-s = Stream()
-s.writeByte(3)
